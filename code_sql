@@ -1,0 +1,47 @@
+### TASK 1 ###
+
+SELECT id, order_id, product_id, quantity, (SELECT customer_id FROM orders o WHERE order_id = o.id ) AS customer_id
+FROM order_details;
+
+### TASK 2 ###
+
+SELECT id, order_id, product_id, quantity
+FROM order_details
+WHERE order_id in (SELECT id FROM orders WHERE shipper_id = 3);
+
+### TASK 3 ###
+
+SELECT order_id, AVG(quantity) as avg_quantity
+FROM (SELECT order_id, quantity FROM order_details WHERE quantity > 10 ) AS temp_table
+GROUP BY order_id;
+
+### TASK 4 ###
+
+WITH TemporalTable AS (
+    SELECT order_id, quantity
+    FROM order_details
+    WHERE quantity > 10
+)
+SELECT order_id, AVG(quantity) AS avg_quantity
+FROM TemporalTable
+GROUP BY order_id;
+
+### TASK 5 ###
+
+DROP FUNCTION IF EXISTS CalculateDivision
+DELIMITER //
+
+CREATE FUNCTION CalculateDivision(input_number_1 FLOAT, input_number_2 FLOAT)
+RETURNS FLOAT
+DETERMINISTIC 
+NO SQL
+BEGIN
+    DECLARE result FLOAT;
+    SET result = input_number_1 / input_number_2;
+    RETURN result;
+END //
+
+DELIMITER ;
+
+SELECT id, quantity, CalculateDivision(quantity, 2.0) AS divided_quantity
+FROM order_details;
